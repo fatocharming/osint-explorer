@@ -1,51 +1,51 @@
 ```python
 import requests
-import json
 
-def check_ip_geolocation(ip_address):
+def fetch_ip_info(ip_address):
     """
-    Check the geolocation of a given IP address using the IPinfo API.
+    Fetches geolocation and ISP information for a given IP address using the ip-api.com service.
     
-    Parameters:
-    ip_address (str): The IP address to check.
-
+    Args:
+        ip_address (str): The IP address to look up.
+    
     Returns:
-    dict: A dictionary containing geolocation information.
+        dict: A dictionary containing IP information or an error message.
     """
-    url = f"https://ipinfo.io/{ip_address}/json"
+    url = f"http://ip-api.com/json/{ip_address}"
     try:
         response = requests.get(url)
         response.raise_for_status()  # Raise an error for bad responses
-        return response.json()  # Return the JSON response as a dictionary
+        return response.json()
     except requests.RequestException as e:
-        print(f"Error fetching data for IP {ip_address}: {e}")
-        return None
+        return {"error": str(e)}
 
-def display_geolocation_info(ip_info):
+def display_ip_info(ip_info):
     """
-    Display the geolocation information in a readable format.
+    Displays the information retrieved for an IP address in a readable format.
     
-    Parameters:
-    ip_info (dict): The geolocation information to display.
+    Args:
+        ip_info (dict): The dictionary containing the IP information.
     """
-    if ip_info:
-        print("IP Address Information:")
-        print(f"IP: {ip_info.get('ip')}")
-        print(f"City: {ip_info.get('city')}")
-        print(f"Region: {ip_info.get('region')}")
-        print(f"Country: {ip_info.get('country')}")
-        print(f"Location: {ip_info.get('loc')}")
-        print(f"Organization: {ip_info.get('org')}")
-    else:
-        print("No information to display.")
+    if "error" in ip_info:
+        print(f"Error: {ip_info['error']}")
+        return
+
+    print(f"IP Address: {ip_info.get('query')}")
+    print(f"Country: {ip_info.get('country')}")
+    print(f"Region: {ip_info.get('regionName')}")
+    print(f"City: {ip_info.get('city')}")
+    print(f"ISP: {ip_info.get('isp')}")
+    print(f"Latitude: {ip_info.get('lat')}")
+    print(f"Longitude: {ip_info.get('lon')}")
 
 def main():
     """
-    The main function to execute the OSINT IP geolocation script.
+    Main function to execute the OSINT project. 
+    It prompts the user for an IP address and fetches its information.
     """
-    ip_address = input("Enter an IP address to lookup: ")
-    ip_info = check_ip_geolocation(ip_address)
-    display_geolocation_info(ip_info)
+    ip_address = input("Enter an IP address to look up: ")
+    ip_info = fetch_ip_info(ip_address)
+    display_ip_info(ip_info)
 
 if __name__ == "__main__":
     main()
