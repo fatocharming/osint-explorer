@@ -1,50 +1,52 @@
 ```python
 import requests
+from bs4 import BeautifulSoup
+import argparse
 
 def fetch_ip_info(ip_address):
     """
-    Fetches geolocation and ISP information for a given IP address using the ip-api.com service.
-    
+    Fetches IP address information from an online API.
+
     Args:
         ip_address (str): The IP address to look up.
-    
+
     Returns:
-        dict: A dictionary containing IP information or an error message.
+        dict: A dictionary containing IP information.
     """
-    url = f"http://ip-api.com/json/{ip_address}"
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an error for bad responses
+        response = requests.get(f'https://ipinfo.io/{ip_address}/json')
+        response.raise_for_status()  # Raises an HTTPError for bad responses
         return response.json()
     except requests.RequestException as e:
-        return {"error": str(e)}
+        print(f"Error fetching data for IP {ip_address}: {e}")
+        return None
 
 def display_ip_info(ip_info):
     """
-    Displays the information retrieved for an IP address in a readable format.
-    
-    Args:
-        ip_info (dict): The dictionary containing the IP information.
-    """
-    if "error" in ip_info:
-        print(f"Error: {ip_info['error']}")
-        return
+    Displays the information of an IP address in a readable format.
 
-    print(f"IP Address: {ip_info.get('query')}")
-    print(f"Country: {ip_info.get('country')}")
-    print(f"Region: {ip_info.get('regionName')}")
-    print(f"City: {ip_info.get('city')}")
-    print(f"ISP: {ip_info.get('isp')}")
-    print(f"Latitude: {ip_info.get('lat')}")
-    print(f"Longitude: {ip_info.get('lon')}")
+    Args:
+        ip_info (dict): Dictionary containing IP information.
+    """
+    if ip_info:
+        print(f"IP Address: {ip_info.get('ip')}")
+        print(f"Hostname: {ip_info.get('hostname', 'N/A')}")
+        print(f"City: {ip_info.get('city', 'N/A')}")
+        print(f"Region: {ip_info.get('region', 'N/A')}")
+        print(f"Country: {ip_info.get('country', 'N/A')}")
+        print(f"Location: {ip_info.get('loc', 'N/A')}")
+        print(f"Organization: {ip_info.get('org', 'N/A')}")
+    else:
+        print("No information available for this IP address.")
 
 def main():
-    """
-    Main function to execute the OSINT project. 
-    It prompts the user for an IP address and fetches its information.
-    """
-    ip_address = input("Enter an IP address to look up: ")
-    ip_info = fetch_ip_info(ip_address)
+    # Set up command-line argument parsing
+    parser = argparse.ArgumentParser(description="OSINT IP Address Lookup Tool")
+    parser.add_argument('ip', type=str, help='IP address to look up')
+    args = parser.parse_args()
+
+    # Fetch and display IP address information
+    ip_info = fetch_ip_info(args.ip)
     display_ip_info(ip_info)
 
 if __name__ == "__main__":
