@@ -1,21 +1,21 @@
 ```python
 import requests
 from bs4 import BeautifulSoup
-import argparse
 
 def fetch_ip_info(ip_address):
     """
-    Fetches IP address information from an online API.
-
+    Fetches geolocation and ISP information of the given IP address.
+    
     Args:
-        ip_address (str): The IP address to look up.
-
+        ip_address (str): The IP address to query.
+    
     Returns:
-        dict: A dictionary containing IP information.
+        dict: A dictionary containing geolocation and ISP information.
     """
+    url = f"https://ipinfo.io/{ip_address}/json"
     try:
-        response = requests.get(f'https://ipinfo.io/{ip_address}/json')
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses
         return response.json()
     except requests.RequestException as e:
         print(f"Error fetching data for IP {ip_address}: {e}")
@@ -23,30 +23,29 @@ def fetch_ip_info(ip_address):
 
 def display_ip_info(ip_info):
     """
-    Displays the information of an IP address in a readable format.
+    Displays the IP information in a readable format.
 
     Args:
-        ip_info (dict): Dictionary containing IP information.
+        ip_info (dict): The IP information dictionary.
     """
     if ip_info:
         print(f"IP Address: {ip_info.get('ip')}")
-        print(f"Hostname: {ip_info.get('hostname', 'N/A')}")
-        print(f"City: {ip_info.get('city', 'N/A')}")
-        print(f"Region: {ip_info.get('region', 'N/A')}")
-        print(f"Country: {ip_info.get('country', 'N/A')}")
-        print(f"Location: {ip_info.get('loc', 'N/A')}")
-        print(f"Organization: {ip_info.get('org', 'N/A')}")
+        print(f"Hostname: {ip_info.get('hostname')}")
+        print(f"City: {ip_info.get('city')}")
+        print(f"Region: {ip_info.get('region')}")
+        print(f"Country: {ip_info.get('country')}")
+        print(f"Location: {ip_info.get('loc')}")
+        print(f"Postal: {ip_info.get('postal')}")
+        print(f"Organization: {ip_info.get('org')}")
     else:
-        print("No information available for this IP address.")
+        print("No information available.")
 
 def main():
-    # Set up command-line argument parsing
-    parser = argparse.ArgumentParser(description="OSINT IP Address Lookup Tool")
-    parser.add_argument('ip', type=str, help='IP address to look up')
-    args = parser.parse_args()
-
-    # Fetch and display IP address information
-    ip_info = fetch_ip_info(args.ip)
+    """
+    Main function to execute the script.
+    """
+    ip_address = input("Enter an IP address to analyze: ")
+    ip_info = fetch_ip_info(ip_address)
     display_ip_info(ip_info)
 
 if __name__ == "__main__":
